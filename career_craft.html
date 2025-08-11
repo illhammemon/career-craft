@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+    <style>
+
+        :root{
+    
+          --bg:#f6fbff; --card:#ffffff; --accent:#2b9af3; --muted:#65748b;
+    
+          --success:#27ae60; --glass:rgba(10,20,30,0.04);
+    
+          font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    
+        }
+    
+        body{margin:0;background:var(--bg);color:#122;line-height:1.45}
+    
+        .wrap{max-width:980px;margin:36px auto;padding:28px}
+    
+        header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    
+        h1{font-size:26px;margin:0}
+    
+        p.lead{color:var(--muted);margin:6px 0 0}
+    
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
+    
+        .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 20px rgba(20,30,40,0.06)}
+    
+        .degree{cursor:pointer;border:2px solid transparent;padding:12px;border-radius:10px;transition:all .15s}
+    
+        .degree:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(20,30,40,0.06)}
+    
+        .degree.active{border-color:var(--accent);background:linear-gradient(180deg, #f3fbff, #fff)}
+    
+        .degree h3{margin:0 0 8px;font-size:16px}
+    
+        .degree small{color:var(--muted)}
+    
+        .results{margin-top:20px;display:grid;grid-template-columns:1fr 320px;gap:20px}
+    
+        .panel{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 20px rgba(20,30,40,0.06)}
+    
+        .pill{display:inline-block;background:var(--glass);padding:6px 10px;border-radius:999px;margin:6px 6px 0 0;font-size:13px;color:var(--muted)}
+    
+        .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    
+        .small{font-size:13px;color:var(--muted)}
+    
+        .skill{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(0,0,0,0.04)}
+    
+        .skill:last-child{border-bottom:none}
+    
+        footer{margin-top:28px;text-align:center;color:var(--muted);font-size:13px}
+    
+        @media (max-width:880px){ .results{grid-template-columns:1fr}}
+    
+      </style>
+
+
+<div class="wrap">
+
+    <header>
+
+      <div>
+
+        <h1>Career Craft — Find paths from your degree</h1>
+
+        <p class="lead">Pick your current education and get curated career options, skill paths and freelance ideas tailored for Pakistan.</p>
+
+      </div>
+
+      <div><button id="resetBtn" class="btn">Reset</button></div>
+
+    </header>
+
+
+
+    <section>
+
+      <h2 style="margin:0 0 8px">Choose your education</h2>
+
+      <div class="grid" id="degreesGrid"></div>
+
+    </section>
+
+
+
+    <section class="results" id="resultsSection" style="display:none">
+
+      <div class="panel" id="mainPanel">
+
+        <h3 id="selectedDegreeTitle">Selected degree</h3>
+
+        <p class="small" id="degreeIntro">Choose a degree to see career paths and skills.</p>
+
+
+
+        <div style="margin-top:12px" id="careersList"></div>
+
+
+
+        <div style="margin-top:14px">
+
+          <h4 style="margin:0 0 8px">Freelance & Quick-start ideas</h4>
+
+          <div id="freelanceList"></div>
+
+        </div>
+
+      </div>
+
+
+
+      <aside class="panel">
+
+        <h4 style="margin:0 0 12px">Skill Roadmap</h4>
+
+        <div id="skillRoadmap"></div>
+
+
+
+        <div style="margin-top:14px">
+
+          <button class="btn" id="copyBtn" style="width:100%">Copy suggestions</button>
+
+        </div>
+
+      </aside>
+
+    </section>
+
+
+
+    <footer>
+
+      <small>Demo module for Career Craft — built for course project. You can expand the JSON with more degrees and suggestions.</small>
+
+    </footer>
+
+  </div>
+
+
+
+  <script>
+
+    // ======= Sample dataset =======
+
+    const data = {
+
+      "FA/FSc": {
+
+        intro: "FA/FSc graduates can explore both academic and skill-based paths. Short courses and freelancing can open entry-level roles quickly.",
+
+        careers: [
+
+          { title:"Data Entry / Admin Assistant", desc:"Office support, invoice handling, data curation." },
+
+          { title:"Junior Content Writer", desc:"Write short articles, social media captions." },
+
+          { title:"Trainee Lab Technician (FSc)", desc:"Assist in labs, hospitals or clinics." }
+
+        ],
+
+        skills: [
+
+          {skill:"MS Office / Google Sheets", level:"Beginner"},
+
+          {skill:"Basic Urdu & English Writing", level:"Beginner"},
+
+          {skill:"Digital Communication (WhatsApp, Email)", level:"Beginner"}
+
+        ],
+
+        freelance: ["Data entry gigs (Upwork/Fiverr)","Social media caption writing"]
+
+      },
+
+      "B.Com": {
+
+        intro: "B.Com holders are suited for finance, accounting and commerce-adjacent roles. Upskilling with digital tools increases employability.",
+
+        careers: [
+
+          { title:"Accounts Assistant", desc:"Use QuickBooks, Tally and manage bookkeeping."},
+
+          { title:"Financial Clerk / Audit Trainee", desc:"Entry roles in firms and NGOs."},
+
+          { title:"Business Development Executive", desc:"Sales support roles in SMEs."}
+
+        ],
+
+        skills: [
+
+          {skill:"Tally / QuickBooks", level:"Beginner-Intermediate"},
+
+          {skill:"Excel (VLOOKUP, Pivot)", level:"Intermediate"},
+
+          {skill:"Basic GST / Tax Awareness", level:"Beginner"}
+
+        ],
+
+        freelance: ["Bookkeeping for small businesses","Excel templates & reports"]
+
+      },
+
+      "BA (Arts)": {
+
+        intro: "BA graduates have broad humanities training — ideal for roles in content, teaching and creative industries.",
+
+        careers:[
+
+          {title:"Content Writer / Editor", desc:"Blogs, news portals, copywriting."},
+
+          {title:"Social Media Coordinator", desc:"Manage posts and community."},
+
+          {title:"Teaching (Primary/Secondary)", desc:"Local private schools or tuition centers."}
+
+        ],
+
+        skills:[
+
+          {skill:"Creative Writing", level:"Beginner-Intermediate"},
+
+          {skill:"Basic Graphic Design (Canva)", level:"Beginner"},
+
+          {skill:"Presentation & Public Speaking", level:"Beginner"}
+
+        ],
+
+        freelance:["Blog writing","Proofreading and editing"]
+
+      },
+
+      "BSCS / IT": {
+
+        intro:"IT and CS grads can move into software testing, front-end roles, or cloud/DevOps entry roles with targeted skills.",
+
+        careers:[
+
+          {title:"Junior Front-end Developer", desc:"HTML/CSS/JS basics, build small websites."},
+
+          {title:"IT Support / Network Admin Trainee", desc:"Helpdesk and network roles."},
+
+          {title:"Quality Assurance (QA) Tester", desc:"Test apps, write test cases."}
+
+        ],
+
+        skills:[
+
+          {skill:"HTML/CSS/JavaScript", level:"Beginner"},
+
+          {skill:"Git & basic CLI", level:"Beginner"},
+
+          {skill:"SQL basics", level:"Beginner"}
+
+        ],
+
+        freelance:["Website setup (Wix/WordPress)","Bug testing gigs"]
+
+      },
+
+      "Design / Textile": {
+
+        intro:"Design grads can enter fashion, textile production, or digital design with portfolio work and freelancing.",
+
+        careers:[
+
+          {title:"Junior Textile Designer", desc:"Work with studios for patterns and samples."},
+
+          {title:"Graphic Designer (Junior)", desc:"Brand assets and social posts."},
+
+          {title:"Production Assistant", desc:"Coordinate sample production and QA."}
+
+        ],
+
+        skills:[
+
+          {skill:"Adobe Illustrator / Photoshop", level:"Beginner-Intermediate"},
+
+          {skill:"Pattern Making basics", level:"Beginner"},
+
+          {skill:"Portfolio presentation", level:"Intermediate"}
+
+        ],
+
+        freelance:["Logo & poster design","Pattern design commissions"]
+
+      },
+
+      "DAE / Technical": {
+
+        intro:"Technical diplomas prepare students for practical roles in engineering, electrical, and mechanical domains.",
+
+        careers:[
+
+          {title:"Technician (Electrical/Mechanical)", desc:"Field-based service and maintenance."},
+
+          {title:"Junior CAD Operator", desc:"Basic drawing and modeling."},
+
+          {title:"Maintenance Supervisor (trainee)", desc:"Industrial maintenance roles."}
+
+        ],
+
+        skills:[
+
+          {skill:"AutoCAD basics", level:"Beginner"},
+
+          {skill:"Hands-on troubleshooting", level:"Intermediate"},
+
+          {skill:"Safety and measurements", level:"Beginner"}
+
+        ],
+
+        freelance:["Small equipment repair gigs","CAD drafting on demand"]
+
+      }
+
+    };
+
+
+
+    // ======= Render degrees grid dynamically =======
+
+    const degreesGrid = document.getElementById('degreesGrid');
+
+    const resultsSection = document.getElementById('resultsSection');
+
+    const selectedDegreeTitle = document.getElementById('selectedDegreeTitle');
+
+    const degreeIntro = document.getElementById('degreeIntro');
+
+    const careersList = document.getElementById('careersList');
+
+    const skillRoadmap = document.getElementById('skillRoadmap');
+
+    const freelanceList = document.getElementById('freelanceList');
+
+    const copyBtn = document.getElementById('copyBtn');
+
+    const resetBtn = document.getElementById('resetBtn');
+
+
+
+    function makeDegreeCard(name){
+
+      const el = document.createElement('div');
+
+      el.className = 'card degree';
+
+      el.innerHTML = `<h3>${name}</h3><small>${data[name].intro.slice(0,80)}...</small>`;
+
+      el.addEventListener('click', ()=>selectDegree(name, el));
+
+      return el;
+
+    }
+
+
+
+    Object.keys(data).forEach(deg => {
+
+      degreesGrid.appendChild(makeDegreeCard(deg));
+
+    });
+
+
+
+    let activeCard = null;
+
+    function selectDegree(name, el){
+
+      // toggle UI state
+
+      if(activeCard) activeCard.classList.remove('active');
+
+      el.classList.add('active');
+
+      activeCard = el;
+
+      // show results area
+
+      resultsSection.style.display = 'grid';
+
+      // populate panels
+
+      selectedDegreeTitle.textContent = name;
+
+      degreeIntro.textContent = data[name].intro;
+
+      renderCareers(data[name].careers);
+
+      renderSkills(data[name].skills);
+
+      renderFreelance(data[name].freelance);
+
+    }
+
+
+
+    function renderCareers(list){
+
+      careersList.innerHTML = '';
+
+      list.forEach(it=>{
+
+        const div = document.createElement('div');
+
+        div.className = 'card';
+
+        div.style.marginTop = '10px';
+
+        div.innerHTML = `<strong>${it.title}</strong><p class="small" style="margin:6px 0 0">${it.desc}</p>`;
+
+        careersList.appendChild(div);
+
+      });
+
+    }
+
+
+
+    function renderSkills(list){
+
+      skillRoadmap.innerHTML = '';
+
+      list.forEach(it=>{
+
+        const s = document.createElement('div');
+
+        s.className = 'skill';
+
+        s.innerHTML = `<div><strong>${it.skill}</strong><div class="small">${it.level}</div></div><div class="pill">Learn</div>`;
+
+        skillRoadmap.appendChild(s);
+
+      });
+
+    }
+
+
+
+    function renderFreelance(list){
+
+      freelanceList.innerHTML = '';
+
+      list.forEach(it=>{
+
+        const p = document.createElement('div');
+
+        p.className = 'pill';
+
+        p.textContent = it;
+
+        freelanceList.appendChild(p);
+
+      });
+
+    }
+
+
+
+    // copy suggestions text to clipboard
+
+    copyBtn.addEventListener('click', async ()=>{
+
+      const deg = selectedDegreeTitle.textContent;
+
+      if(!deg) return alert('Select a degree first');
+
+      let text = `Career Craft suggestions for ${deg}\n\nCareers:\n`;
+
+      data[deg].careers.forEach(c=> text += `- ${c.title}: ${c.desc}\n`);
+
+      text += `\nSkills:\n`;
+
+      data[deg].skills.forEach(s=> text += `- ${s.skill} (${s.level})\n`);
+
+      text += `\nFreelance ideas:\n- ${data[deg].freelance.join('\n- ')}`;
+
+      await navigator.clipboard.writeText(text);
+
+      alert('Copied suggestions to clipboard.');
+
+    });
+
+
+
+    resetBtn.addEventListener('click', ()=>{
+
+      if(activeCard) activeCard.classList.remove('active');
+
+      activeCard = null;
+
+      resultsSection.style.display = 'none';
+
+    });
+
+
+
+    // On load, optionally auto-select first
+
+    // selectDegree(Object.keys(data)[0], degreesGrid.firstChild);
+
+  </script>
+
+</body>
+</html>
